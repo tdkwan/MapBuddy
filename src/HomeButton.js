@@ -9,7 +9,7 @@ import {
         Text
 } from 'react-native';
 
-export default class MyButton extends Component {
+export default class HomeButton extends Component {
     render() {
         return(
             <TouchableHighlight onPress={this.props.onHomeButtonPress}>
