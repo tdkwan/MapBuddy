@@ -12,9 +12,9 @@ import {
 export default class HomeButton extends Component {
     render() {
         return(
-            <TouchableHighlight onPress={this.props.onHomeButtonPress}>
-                <View style={this.props.styles.homeButton}>
-                    <Text style={this.props.styles.buttonText}>HOME</Text>
+            <TouchableHighlight onPress={this.props.onPress}>
+                <View style={this.props.buttonStyle}>
+                    <Text style={this.props.textStyle}>HOME</Text>
                 </View>
             </TouchableHighlight>
         );

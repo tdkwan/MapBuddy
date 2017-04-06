@@ -9,12 +9,12 @@ import {
         Text
 } from 'react-native';
 
-export default class ExploreButton extends Component {
+export default class MapButton extends Component {
     render() {
         return(
-            <TouchableHighlight onPress={this.props.onExploreButtonPress}>
-                <View style={this.props.styles.exploreButton}>
-                    <Text style={this.props.styles.buttonText}>EXPLORE</Text>
+            <TouchableHighlight onPress={this.props.onPress}>
+                <View style={this.props.buttonStyle}>
+                    <Text style={this.props.textStyle}>{this.props.buttonText}</Text>
                 </View>
             </TouchableHighlight>
         );

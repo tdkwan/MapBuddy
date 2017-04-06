@@ -1,5 +1,6 @@
 'use strict';
-
+/*NEXT GOAL, saving the state of each location change, talking to gps to save the session of the
+user and where he/she went, what points she tracked etc. ?datastructures ?locationlistening */
 import React, { Component } from 'react';
 import MapBox, { MapView } from 'react-native-mapbox-gl';
 import {
@@ -12,18 +13,19 @@ import {
         Image,
 } from 'react-native';
 
-import HomeButton from './HomeButton';
-import ExploreButton from './ExploreButton';
+import MapButton from './MapButton';
 
 const accessToken = 'pk.eyJ1IjoidGRrd2FuIiwiYSI6ImNpeXh6M2E0ZjAwOWIycW82Mmc1cm10bnQifQ.kcNY9PN_ObOcx1ZXXsXDQw';
 MapBox.setAccessToken(accessToken);
 
-/*Class MapBuddy is the root component of the React Native App MapBuddy*/
+/*
+Class MapBuddy is the root component of the React Native App MapBuddy
+*/
 class MapBuddy extends Component {
 
-    /*Set the initial state with the initial mapViewLocation
-    the current zoomLevel, initial map orientation
-    */
+/*Set the initial state with the initial mapViewLocation
+the current zoomLevel, initial map orientation
+*/
     constructor(props) {
         super(props);
         this.state = {
@@ -34,28 +36,45 @@ class MapBuddy extends Component {
             showsUserLocation: true,
             homeLocation: 'unknown',
             annotations: [
+            ],
+            annotationsAreImmutable: false,
+            logoIsHidden: false,
+            pastLocations: [{
+                latitude: 'unknown',
+                longitude: 'unknown',
+            }
             ]
         };
     }
 
-//when the View is mounted the initial actions,
-//gets a current location for the person, and sets the initial location of
-//the Mapview to that location.
-    componentDidMount() {
+/*
+Initial Actions when the main View component is mounted:
+gets a current location for the person, and sets the initial location of
+the Mapview to that location.
+*/
+    componentWillMount() {
         navigator.geolocation.getCurrentPosition(
             (position) => {
-                var initialLocation = position;
-                this.setState({initialLocation});
+                this.setState({initialLocation: position});
+                this.setState({
+                                pastLocations: [...this.state.pastLocations, {
+                                   latitude: position.coords.latitude,
+                                   longitude: position.coords.longitude,
+                               }]
+                           });
             },
             (err) => {
                 console.warn(`ERROR(${err.code}): ${err.message}`);
             },
             {}
         )
+
     }
 
-//initial callBack function for when the 'home' button is pressed, confirms the action
-//calls the addHomeMarker method.
+/*
+initial callBack function for when the 'home' button is pressed, confirms the action
+calls the addHomeMarker method.
+*/
     onHomeButtonPress = () => {
         Alert.alert(
             'Set Home?',
@@ -65,10 +84,13 @@ class MapBuddy extends Component {
                 {text: 'Ok!', onPress : () => {this.addHomeMarker()}}
             ]
         );
+        console.log(Object.keys(this.state.pastLocations[0]));
     };
 
-//pre: onHomeButtonPress called and Ok! was pressed on Home Alert Button
-//post: sets a home annotation by treating the original annotations array as immutable and updating
+/*
+pre: onHomeButtonPress called and the action was confirmed
+post: sets a home annotation by treating the original annotations array as immutable and updating.
+*/
     addHomeMarker = () => {
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -89,8 +111,9 @@ class MapBuddy extends Component {
                             height: 25,
                             width: 25
                         }
-                    }]
-                });
+                    },
+
+                ]});
             },
             (err) => {
                 console.warn(`ERROR(${err.code}): ${err.message}`);
@@ -100,6 +123,10 @@ class MapBuddy extends Component {
     };
 
     //function called when explore Button is pressed
+    //changes the pitch and the zoom to enter into explore mode,
+    //initiate logging of locations to then draw polylines.
+    //we are going to have to update a 2d array of coordinates in an object in the annotations array of objects that defines the lines
+    //on each location change.
     onExploreButtonPress = () => {
         var map = this._map;
         navigator.geolocation.getCurrentPosition(
@@ -149,7 +176,7 @@ class MapBuddy extends Component {
 
     render() {
         return (
-            <View style={styles.container}>
+            <View accessible={true} accessibilityLabel={'Map view'} style={styles.container}>
                 <MapView
                     ref={map => {this._map = map; } }
                     style={styles.map}
@@ -159,18 +186,24 @@ class MapBuddy extends Component {
                     initialDirection={this.state.initialDirection}
                     showsUserLocation={this.state.showsUserLocation}
                     userTrackingMode={MapBox.userTrackingMode.follow}
+                    // onUpdateUserLocation={ } use the payload to mutate the coordinates for the polyline
+                    // check for exploreCondition if true then continue to mutate the array otherwise abort action early.
                     annotations={this.state.annotations}
                     annotationPopUpEnabled={true}
                     annotationsAreImmutable={true}
                     pitchEnabled={true}
                 />
-                <HomeButton
-                    onHomeButtonPress={this.onHomeButtonPress}
-                    styles={styles}
+                <MapButton
+                    onPress={this.onHomeButtonPress}
+                    buttonStyle={styles.homeButton}
+                    textStyle={styles.buttonText}
+                    buttonText="HOME"
                 />
-                <ExploreButton
-                    onExploreButtonPress={this.onExploreButtonPress}
-                    styles={styles}
+                <MapButton
+                    onPress={this.onExploreButtonPress}
+                    buttonStyle={styles.exploreButton}
+                    textStyle={styles.buttonText}
+                    buttonText="EXPLORE"
                 />
             </View>
         );
