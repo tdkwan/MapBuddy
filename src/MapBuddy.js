@@ -56,6 +56,7 @@ the Mapview to that location.
 
     }
 
+
     componentDidMount() {
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -98,16 +99,17 @@ post: sets a home annotation by treating the original annotations array as immut
     addHomeMarker = () => {
         navigator.geolocation.getCurrentPosition(
             (position) => {
-                var homeLocation = position;
-                this.setState({homeLocation});
+                var currentLocation = position;
+                this.setState({homeLocation: currentLocation});
                 console.log('Your current position is:');
-                console.log(`Latitude : `+ homeLocation.coords.latitude);
-                console.log(`Longitude: `+ homeLocation.coords.longitude);
+                console.log(`Latitude : `+ currentLocation.coords.latitude);
+                console.log(`Longitude: `+ currentLocation.coords.longitude);
                 console.log('More or less ' + position.coords.accuracy + ' meters.');
                 this.setState({
+                    pastLocations: [...this.state.pastLocations, {currentLocation}],
                     annotations: [ ...this.state.annotations, {
                         //Insert a new point marker for the home
-                        coordinates: [ homeLocation.coords.latitude, homeLocation.coords.longitude],
+                        coordinates: [ currentLocation.coords.latitude, currentLocation.coords.longitude],
                         type: 'point',
                         title: 'this is the home marker',
                         id: 'home',
@@ -118,7 +120,7 @@ post: sets a home annotation by treating the original annotations array as immut
                         }
                     },
                     {
-                        coordinates: [[homeLocation.coords.latitude, homeLocation.coords.longitude]],
+                        coordinates: [[currentLocation.coords.latitude, currentLocation.coords.longitude]],
                         type: 'polyline',
                         title: 'this is the path traveled',
                         id: 'path',
@@ -129,7 +131,7 @@ post: sets a home annotation by treating the original annotations array as immut
             (err) => {
                 console.warn(`ERROR(${err.code}): ${err.message}`);
             },
-            {}
+
         )
     };
 
@@ -150,7 +152,9 @@ post: sets a home annotation by treating the original annotations array as immut
                     longitude: this.state.currentLocation.coords.longitude,
                     direction: this.state.currentLocation.coords.heading,
                     pitch: 60,
-                    zoomLevel: 18});
+                    zoomLevel: 19});
+
+
     //    var annotationsCoordinate = this.state.annotations[1].coordinates;
         //this.setState((prevState) => {
         //});
@@ -228,7 +232,7 @@ post: sets a home annotation by treating the original annotations array as immut
                       <ActionButton.Item buttonColor='#1abc9c' title="All Tasks" onPress={() => {}}>
                         <Icon name="md-done-all" style={styles.actionButtonIcon} />
                       </ActionButton.Item>
-                     </ActionButton>
+                    </ActionButton>
         })
         return (
             <View accessible={true} accessibilityLabel={'Map view'} style={styles.container}>
@@ -249,13 +253,14 @@ post: sets a home annotation by treating the original annotations array as immut
                     pitchEnabled={true}
                 />
                 { componentArray }
-                <View style={styles.buttonContainer}>
-                    <Button
-                        onPress={this.onHomeButtonPress}
-                        containerStyle={styles.roundedButton}
-                        style={styles.buttonTextStyle}>
-                        Home
-                    </Button>
+                    <ActionButton buttonColor="rgba(231,76,60,1)">
+                        <ActionButton.Item
+                            buttonColor='#FF4242'
+                            title="Home"
+                            onPress={this.onHomeButtonPress}>
+                            <Icon name="ios-home" style={styles.actionButtonIcon} />
+                        </ActionButton.Item>
+                    </ActionButton>
                     <Button
                         onPress={this.onExploreButtonPress}
                         containerStyle={styles.roundedButton}
@@ -263,7 +268,6 @@ post: sets a home annotation by treating the original annotations array as immut
                         Explore
                     </Button>
 
-                </View>
             </View>
         );
     }
