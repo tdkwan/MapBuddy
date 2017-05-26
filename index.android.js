@@ -1,2 +1,1 @@
-import MapBuddy from './src/MapBuddy';
- 
+import MapBuddy from './js/components/MapBuddy';
