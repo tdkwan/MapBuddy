@@ -10,6 +10,7 @@ import {
         View,
         Alert,
         Image,
+        AsyncStorage,
 } from 'react-native';
 import ActionButton from 'react-native-action-button';
 import Icon from 'react-native-vector-icons/Entypo';
@@ -48,6 +49,13 @@ Stack object for state
         };
     }
 
+    /*
+    Load past state of the application, mainly testing the functionality of AsyncStorage
+    */
+    /*loadPastSession = () => {
+        AsyncStorage.getItem()
+    }*/
+
     /*Map Component about to mount, pre render
     gets the phones current position with success,
     timout, and error callbacks
@@ -70,9 +78,16 @@ Stack object for state
 
     /*Ends the watch session of the navigator.geolocation.watchposition
     As well as uses asyncstorage to store the current state of the component
-
+    (need to get past state number and determine what to set as the key for the state save for sequential session saving)
     */
     componentWillUnmount() {
+        /*var stateData = JSON.stringify(this.state);
+        try {
+            await AsyncStorage.setItem(stateSaveKey, stateData);
+        } catch (error) {
+            console.log(error.message);
+        }
+        */
         navigator.geolocation.clearWatch(this.watchId);
     }
 
@@ -157,7 +172,7 @@ Stack object for state
                 title: 'There is a hole here!',
                 id: 'hole' + this.state.holeCounter,
             }]
-        })
+        });
     }
     /*Fired when user touches any location on the MapView
     */
