@@ -54,8 +54,38 @@ Stack object for state
     */
     /*loadPastSession = () => {
         AsyncStorage.getItem()
-    }*/
+    }
+    in order to use async storage, it must be used within the scope of an asynchronous
+    function*/
+    //update: seems to compile fine but need to check if it is actually saving state.
+    async saveState() {
+        var stateStringified = JSON.stringify(this.state);
+        try {
+            await AsyncStorage.setItem('stateData', stateStringified);
+        } catch (error) {
+            console.log('error saving state data to asyncstorage');
+        }
+    }
 
+    async getPastState() {
+        try {
+            var pastState = await AsyncStorage.getItem('stateData');
+            if (pastState !== null) {
+                Alert.alert(
+                    'Load Past Session?',
+                    'This will load MapBuddys last session data including past locations',
+                    [
+                        {text: 'Ok!', onPress: () => this.setState(JSON.parse(pastState))},
+                        {text: 'Cancel', onPress: () => console.log('New Session Started')},
+                    ],
+                    {cancelable: true}
+                );
+                console.log(pastState);
+            }
+        } catch (error) {
+            console.log('no past state data to retrieve');
+        }
+    }
     /*Map Component about to mount, pre render
     gets the phones current position with success,
     timout, and error callbacks
@@ -73,6 +103,7 @@ Stack object for state
             },
             {enableHighAccuracy: true, timeout: 5000, maximumAge: 0 } //options for getting location
         );
+        this.getPastState();
         //using an object as an argument to setState performs a shallow merge of past and present state
     };
 
@@ -81,13 +112,6 @@ Stack object for state
     (need to get past state number and determine what to set as the key for the state save for sequential session saving)
     */
     componentWillUnmount() {
-        /*var stateData = JSON.stringify(this.state);
-        try {
-            await AsyncStorage.setItem(stateSaveKey, stateData);
-        } catch (error) {
-            console.log(error.message);
-        }
-        */
         navigator.geolocation.clearWatch(this.watchId);
     }
 
@@ -173,6 +197,7 @@ Stack object for state
                 id: 'hole' + this.state.holeCounter,
             }]
         });
+        this.saveState();
     }
     /*Fired when user touches any location on the MapView
     */
